@@ -5,7 +5,7 @@ from flask_login import UserMixin
 
 @login_manager.user_loader
 def load_user(user_id):
-    return AppUser.query.get(int(user_id))
+    return AppUser.query.get_or_404(int(user_id))
 
 
 class AppUser(db.Model, UserMixin):
@@ -25,7 +25,6 @@ class AppUser(db.Model, UserMixin):
 
     def __repr__(self):
         return f"AppUser('{self.username}', '{self.email}', '{self.image_file}')"
-
 
 
 class Post(db.Model):

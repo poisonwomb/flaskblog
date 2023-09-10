@@ -18,8 +18,13 @@ Then the .db file is created in a folder called "Instance" in your project.
 """
 db = SQLAlchemy(app)
 bcrypt = Bcrypt(app)
+# Initialising flask_login
 login_manager = LoginManager(app)
 login_manager.init_app(app)
+# Setting the name of the login function/route as the login view.
+login_manager.login_view = "login"
+# Setting login status messages to use the Bootstrap 'info' category for styling.
+login_manager.login_message_category = "info"
 
 # Routes need to be imported after app is created as routes require app.
 from flaskblog import routes  # noqa: E402, F401
