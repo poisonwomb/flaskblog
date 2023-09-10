@@ -1,13 +1,76 @@
 {% extends "layout.html" %}
 {% block content %}
     <div class="content-section">
-        <div class="media">
-            <img class="rounded-circle account-img" src="userimage.jpg">
-            <div class="media-body">
-                <h2 class="account-heading">{{ current_user.username }}</h2>
-                <p class="text-secondary">{{ current_user.email }}</p>
+        <div class="row">
+            <div class="col-md-3">
+                <img class="rounded-circle account-img" src="{{ image_file }}" alt="profile picture">
             </div>
+            <div class="col-md-9">
+                <div class="media">
+                    <div class="media-body">
+                        <h2 class="account-heading">{{ current_user.username }}</h2>
+                        <p class="text-secondary">{{ current_user.email }}</p>
+                    </div>
+                </div>
+            </div>
+            <form method="POST" action="" enctype="multipart/form-data">
+                {{ form.hidden_tag() }}
+                <fieldset class="form-group">
+                    <legend class="border-bottom mb-4">Account Info</legend>
+                    {# There is a lot of validation boilerplate here. You
+                               can use the flask-bootstrap extension to simplify
+                               this but doing it this way offers more control. #}
+                    <div class="form-group">
+                        {# Label refers to the label field of the object in forms.py. #}
+                        {{ form.username.label(class="form-control-label") }}
+                        {# If there are errors when submitting the form... #}
+                        {% if form.username.errors %}
+                            {# Add the bootstrap is-invalid class to the form... #}
+                            {{ form.username(class="form-control form-control-lg is-invalid") }}
+                            {# And using the bootstrap class for error feedback... #}
+                            <div class="invalid-feedback">
+                                {# Print all the errors in a span tag. #}
+                                {% for error in form.username.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {# If the form is valid, proceed normally. #}
+                            {{ form.username(class="form-control form-control-lg") }}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.email.label(class="form-control-label") }}
+                        {% if form.email.errors %}
+                            {# Add the bootstrap is-invalid class to the form... #}
+                            {{ form.email(class="form-control form-control-lg is-invalid") }}
+                            {# And using the bootstrap class for error feedback... #}
+                            <div class="invalid-feedback">
+                                {# Print all the errors in a span tag. #}
+                                {% for error in form.email.errors %}
+                                    <span>{{ error }}</span>
+                                {% endfor %}
+                            </div>
+                        {% else %}
+                            {# If the form is valid, proceed normally. #}
+                            {{ form.email(class="form-control form-control-lg") }}
+                        {% endif %}
+                    </div>
+                    <div class="form-group">
+                        {{ form.picture.label() }}<br/>
+                        {{ form.picture(class="form-control-file") }}
+                        {% if form.picture.errors %}
+                            {% for error in form.picture.errors %}
+                                <span class="text-danger">{{ error }}</span><br/>
+                            {% endfor %}
+                        {% endif %}
+                    </div>
+                </fieldset>
+                <div class="form-group">
+                    {{ form.submit(class="btn btn-outline-info") }}
+                </div>
+            </form>
+
         </div>
-        <!-- FORM HERE -->
     </div>
 {% endblock content %}

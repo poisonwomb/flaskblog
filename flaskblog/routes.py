@@ -1,6 +1,12 @@
+from pathlib import Path
+import secrets
+
 from flask import render_template, url_for, flash, redirect, request
 from flask_login import login_user, current_user, logout_user, login_required
-from flaskblog.forms import RegistrationForm, LoginForm
+from flaskblog.forms import RegistrationForm, LoginForm, UpdateAccountForm
+
+# Pillow (image resizing)
+from PIL import Image
 
 from flaskblog import app, db, bcrypt
 
@@ -76,7 +82,6 @@ def login():
             # Log the user in with flask_login.
             login_user(user, remember=form.remember.data)
             # Get the (optional) 'next' argument passed by the prev page.
-            args = request.args
             next_page = request.args.get("next")
             # If the 'next' argument was provided, redirect to that page, else home.
             return redirect(next_page) if next_page else redirect(url_for("home"))
@@ -94,7 +99,45 @@ def logout():
     return redirect(url_for("home"))
 
 
-@app.route(rule="/account")
+def save_picture(form_picture):
+    pics_path = Path(app.root_path) / "static/profile_pics"
+    random_hex = secrets.token_hex(8)
+    f_ext = Path(form_picture.filename).suffix
+
+    picture_filename = random_hex + f_ext
+    new_picture_path = pics_path / picture_filename
+    prev_picture_path = pics_path / current_user.image_file
+
+    output_size = (250, 250)
+    # Create a new pillow image object from the uploaded picture.
+    image = Image.open(form_picture)
+    # Reduce the image to the size in output_size.
+    image.thumbnail(output_size)
+
+    if prev_picture_path.exists():
+        # Delete the previous picture.
+        prev_picture_path.unlink()
+    image.save(new_picture_path)
+    return picture_filename
+
+
+@app.route(rule="/account", methods=["GET", "POST"])
 @login_required
 def account():
-    return render_template("account.html", title="Account")
+    form = UpdateAccountForm()
+    if form.validate_on_submit():
+        if form.picture.data:
+            picture_file = save_picture(form.picture.data)
+            current_user.image_file = picture_file
+        current_user.username = form.username.data
+        current_user.email = form.email.data
+        db.session.commit()
+        flash(message="Your account has been updated!", category="success")
+        return redirect(url_for("account"))
+    elif request.method == "GET":
+        form.username.data = current_user.username
+        form.email.data = current_user.email
+    image_file = url_for("static", filename="profile_pics/" + current_user.image_file)
+    return render_template(
+        "account.html", title="Account", image_file=image_file, form=form
+    )
