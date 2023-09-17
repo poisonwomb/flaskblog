@@ -1,5 +1,9 @@
 from datetime import datetime
-from flaskblog import db, login_manager
+
+import itsdangerous.exc
+from itsdangerous.url_safe import URLSafeTimedSerializer as Serializer
+
+from flaskblog import db, login_manager, app
 from flask_login import UserMixin
 
 
@@ -22,6 +26,24 @@ class AppUser(db.Model, UserMixin):
     image_file = db.Column(db.String(20), nullable=False, default="default.jpg")
     password = db.Column(db.String(60), nullable=False)
     posts = db.relationship("Post", backref="author", lazy=True)
+
+    def get_reset_token(self):
+        # Create a serializer object using our secret key.
+        s = Serializer(secret_key=app.config["SECRET_KEY"])
+        # Serialize the user ID so it can be used as a token.
+        return s.dumps({"user_id": self.id})
+
+    # We do not do anything with the instance of AppUser so this method can be static.
+    @staticmethod
+    def verify_reset_token(token, expires_sec=1800):
+        s = Serializer(secret_key=app.config["SECRET_KEY"])
+        # If the string cannot be deserialized/has expired we will get an error here.
+        try:
+            # max_age is the maximum age of the token in seconds.
+            user_id = s.loads(token, max_age=expires_sec)["user_id"]
+        except itsdangerous.exc.BadSignature:
+            return None
+        return AppUser.query.get_or_404(user_id)
 
     def __repr__(self):
         return f"AppUser('{self.username}', '{self.email}', '{self.image_file}')"
