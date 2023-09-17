@@ -1,0 +1,48 @@
+{% extends "layout.html" %}
+{% block content %}
+    <div class="content-section">
+        <form method="POST">
+            {{ form.hidden_tag() }}
+            <fieldset class="form-group">
+                <legend class="border-bottom mb-4">{{ legend }}</legend>
+                {# There is a lot of validation boilerplate here. You can use the
+                flask-bootstrap extension to simplify this but doing it this way offers
+                    more control. #}
+                <div class="form-group">
+                    {{ form.title.label(class="form-control-label") }}
+                    {% if form.title.errors %}
+                        {# Add the bootstrap is-invalid class to the form... #}
+                        {{ form.title(class="form-control form-control-lg is-invalid") }}
+                        {# And using the bootstrap class for error feedback...#}
+                        <div class="invalid-feedback">
+                            {# Print all the errors in a span tag. #}
+                            {% for error in form.title.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %}
+                        {# If the form is valid, proceed normally. #}
+                        {{ form.title   (class="form-control form-control-lg") }} {% endif %}
+                </div>
+                <div class="form-group">
+                    {{ form.content.label(class="form-control-label") }}
+                    {% if form.content.errors %}
+                        {# Add the bootstrap is-invalid class to the form... #}
+                        {{ form.content(class="form-control form-control-lg is-invalid") }}
+                        {# And using the bootstrap class for error feedback...#}
+                        <div class="invalid-feedback">
+                            {# Print all the errors in a span tag. #}
+                            {% for error in form.content.errors %}
+                                <span>{{ error }}</span>
+                            {% endfor %}
+                        </div>
+                    {% else %} {# If the form is valid, proceed normally. #}
+                        {{ form.content(class="form-control form-control-lg") }} {% endif %}
+                </div>
+            </fieldset>
+            <div class="form-group">
+                {{ form.submit(class="btn btn-outline-info") }}
+            </div>
+        </form>
+    </div>
+{% endblock content %}
