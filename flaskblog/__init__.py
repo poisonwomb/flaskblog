@@ -1,33 +1,41 @@
-import os
-
 from flask import Flask
 from flask_sqlalchemy import SQLAlchemy
 from flask_bcrypt import Bcrypt
 from flask_login import LoginManager
 from flask_mail import Mail
 
-app = Flask(__name__)
-app.config["SECRET_KEY"] = os.environ.get("SECRET_KEY")
-app.config["SQLALCHEMY_DATABASE_URI"] = os.environ.get("SQLALCHEMY_DATABASE_URI")
+from flaskblog.config import Config
 
-db = SQLAlchemy(app)
-bcrypt = Bcrypt(app)
+
+db = SQLAlchemy()
+bcrypt = Bcrypt()
 # Initialising flask_login
-login_manager = LoginManager(app)
-login_manager.init_app(app)
+login_manager = LoginManager()
 # Setting the name of the login function/route as the login view.
-login_manager.login_view = "login"
+login_manager.login_view = "users.login"
 # Setting login status messages to use the Bootstrap 'info' category for styling.
 login_manager.login_message_category = "info"
+mail = Mail()
 
-# Setting up email credentials.
-app.config["MAIL_SERVER"] = os.environ.get("MAIL_SERVER")
-app.config["MAIL_PORT"] = os.environ.get("MAIL_PORT")
-app.config["MAIL_USE_TLS"] = True
-app.config["MAIL_USERNAME"] = os.environ.get("MAIL_USERNAME")
-app.config["MAIL_PASSWORD"] = os.environ.get("MAIL_PASSWORD")
 
-mail = Mail(app)
+def create_app(config_class=Config):
+    app = Flask(__name__)
+    app.config.from_object(Config)
 
-# Routes need to be imported after app is created as routes require app.
-from flaskblog import routes  # noqa: E402, F401
+    # Importing blueprints
+    from flaskblog.main.routes import main  # noqa: E402
+    from flaskblog.posts.routes import posts  # noqa: E402
+    from flaskblog.users.routes import users  # noqa: E402
+
+    # Registering blueprints to the app.
+    app.register_blueprint(main)
+    app.register_blueprint(posts)
+    app.register_blueprint(users)
+
+    # Initialising the extensions created outside this function with the app.
+    db.init_app(app)
+    bcrypt.init_app(app)
+    login_manager.init_app(app)
+    mail.init_app(app)
+
+    return app

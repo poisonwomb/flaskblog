@@ -3,7 +3,8 @@ from datetime import datetime
 import itsdangerous.exc
 from itsdangerous.url_safe import URLSafeTimedSerializer as Serializer
 
-from flaskblog import db, login_manager, app
+from flask import current_app
+from flaskblog import db, login_manager
 from flask_login import UserMixin
 
 
@@ -29,14 +30,14 @@ class AppUser(db.Model, UserMixin):
 
     def get_reset_token(self):
         # Create a serializer object using our secret key.
-        s = Serializer(secret_key=app.config["SECRET_KEY"])
+        s = Serializer(secret_key=current_app.config["SECRET_KEY"])
         # Serialize the user ID so it can be used as a token.
         return s.dumps({"user_id": self.id})
 
     # We do not do anything with the instance of AppUser so this method can be static.
     @staticmethod
     def verify_reset_token(token, expires_sec=1800):
-        s = Serializer(secret_key=app.config["SECRET_KEY"])
+        s = Serializer(secret_key=current_app.config["SECRET_KEY"])
         # If the string cannot be deserialized/has expired we will get an error here.
         try:
             # max_age is the maximum age of the token in seconds.
