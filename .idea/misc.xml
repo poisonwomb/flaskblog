@@ -4,7 +4,7 @@
     <option name="enabledOnSave" value="true" />
     <option name="executionMode" value="BINARY" />
     <option name="pathToExecutable" value="$USER_HOME$/.local/bin/black" />
-    <option name="sdkUUID" value="ce3ccb8b-f94e-49c8-99a1-0793d8c09765" />
+    <option name="sdkName" value="Pipenv (flaskblog)" />
   </component>
   <component name="ProjectRootManager" version="2" project-jdk-name="Pipenv (flaskblog)" project-jdk-type="Python SDK" />
 </project>

@@ -1,0 +1,23 @@
+# Pull official base image
+FROM python:3.11.6-bookworm
+
+# Set work directory
+WORKDIR /usr/src/app
+
+# Set environment variables
+ENV PYTHONDONTWRITEBYTECODE 1
+ENV PYTHONUNBUFFERED 1
+
+# Install dependencies
+RUN pip install --upgrade pip
+RUN pip install pipenv
+COPY Pipfile Pipfile.lock /usr/src/app/
+RUN pipenv install --deploy --ignore-pipfile
+
+# Copy rest of app files to
+COPY . /usr/src/app
+
+EXPOSE 5000
+
+# Run gunicorn in pipenv, use gunicorn_config.py as config; in the run.py file : launch the app object.
+CMD ["pipenv", "run", "gunicorn", "--config", "gunicorn_config.py", "run:app"]

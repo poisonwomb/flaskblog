@@ -2,18 +2,35 @@ version: '3'
 
 services:
   web:
-    build: .
-    ports:
-      - "5000:5000"
+    build:
+      context: .
+      dockerfile: Dockerfile.prod
+    expose:
+      - "5000"
     environment:
+      - FLASK_ENV=production
       - SQLALCHEMY_DATABASE_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
       - SECRET_KEY=${SECRET_KEY}
       - MAIL_SERVER=${MAIL_SERVER}
       - MAIL_USE_TLS=${MAIL_USE_TLS}
       - MAIL_USERNAME=${MAIL_USERNAME}
       - MAIL_PASSWORD=${MAIL_PASSWORD}
+    volumes:
+      - static:/usr/src/app/flaskblog/static
+      - templates:/usr/src/app/flaskblog/templates
     depends_on:
       - db
+
+  nginx:
+    image: nginx:latest
+    volumes:
+      - "./nginx.conf:/etc/nginx/nginx.conf:ro"
+      - static:/usr/src/app/flaskblog/static
+      - templates:/usr/src/app/flaskblog/templates
+    ports:
+      - "80:80"
+    depends_on:
+      - web
 
   db:
     image: postgres:latest
@@ -25,3 +42,7 @@ services:
 networks:
   host:
     driver: host
+
+volumes:
+  static:
+  templates:
