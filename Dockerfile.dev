@@ -8,9 +8,6 @@ WORKDIR /usr/src/app
 ENV PYTHONDONTWRITEBYTECODE 1
 ENV PYTHONUNBUFFERED 1
 
-# Print environment variables
-RUN printenv
-
 # Install dependencies
 RUN pip install --upgrade pip
 RUN pip install pipenv

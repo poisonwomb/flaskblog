@@ -1,24 +1,26 @@
 version: '3'
 
 services:
-  web:
+  web-dev:
     build:
       context: .
       dockerfile: Dockerfile.dev
     ports:
-      - "5000:5000"
+      - "80:5000"
     environment:
       - FLASK_ENV=development
-      - SQLALCHEMY_DATABASE_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db:5432/${POSTGRES_DB}
+      - SQLALCHEMY_DATABASE_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@db-dev:5432/${POSTGRES_DB}
       - SECRET_KEY=${SECRET_KEY}
       - MAIL_SERVER=${MAIL_SERVER}
       - MAIL_USE_TLS=${MAIL_USE_TLS}
       - MAIL_USERNAME=${MAIL_USERNAME}
       - MAIL_PASSWORD=${MAIL_PASSWORD}
+    volumes:
+      - .:/usr/src/app
     depends_on:
-      - db
+      - db-dev
 
-  db:
+  db-dev:
     image: postgres:latest
     environment:
       - POSTGRES_USER=${POSTGRES_USER}
